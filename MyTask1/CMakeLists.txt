@@ -11,7 +11,8 @@ set(SOURCE_FILES
         glad.c
         Image.cpp
         Player.cpp
-        main.cpp)
+        main.cpp
+        Room.cpp)
 
 set(ADDITIONAL_INCLUDE_DIRS
         dependencies/include/GLAD)

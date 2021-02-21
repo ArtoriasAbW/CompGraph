@@ -1,6 +1,7 @@
 #include "common.h"
 #include "Image.h"
 #include "Player.h"
+#include "Room.h"
 
 #define GLFW_DLL
 #include <GLFW/glfw3.h>
@@ -43,16 +44,16 @@ void OnKeyboardPressed(GLFWwindow* window, int key, int scancode, int action, in
 	}
 }
 
-void processPlayerMovement(Player &player)
+void processPlayerMovement(Player &player, Room &room)
 {
   if (Input.keys[GLFW_KEY_W])
-    player.ProcessInput(MovementDir::UP);
+    player.ProcessInput(MovementDir::UP, room);
   else if (Input.keys[GLFW_KEY_S])
-    player.ProcessInput(MovementDir::DOWN);
+    player.ProcessInput(MovementDir::DOWN, room);
   if (Input.keys[GLFW_KEY_A])
-    player.ProcessInput(MovementDir::LEFT);
+    player.ProcessInput(MovementDir::LEFT, room);
   else if (Input.keys[GLFW_KEY_D])
-    player.ProcessInput(MovementDir::RIGHT);
+    player.ProcessInput(MovementDir::RIGHT, room);
 }
 
 void OnMouseButtonClicked(GLFWwindow* window, int button, int action, int mods)
@@ -115,24 +116,52 @@ int initGL()
 }
 
 
-void drawBackground(Image *screen) {
-  Image img("resources/back2.png");
-  Image wall("resources/wall.png");
-  int width = img.Width(); 
-  int height = img.Height(); 
-  for (int screen_x = 0; screen_x < WINDOW_WIDTH / 1.5; screen_x += width) {
-    for (int screen_y = 0; screen_y < WINDOW_HEIGHT / 1.5; screen_y += height) {
-      for (int x = 0; x < width; ++x) {
-        for (int y = 0; y < height; ++y) {
-          if (screen_x == 0 || screen_y == 0 || screen_x > WINDOW_WIDTH / 1.5 - width || screen_y > WINDOW_HEIGHT / 1.5 - height) {
-            screen->PutPixel(screen_x + x, screen_y + y, wall.GetPixel(x, height - y - 1));
-          } else {
-            screen->PutPixel(screen_x + x, screen_y + y, img.GetPixel(x, height - y - 1));
-          }
-        }
-      }
+void DrawTile(Image &screen, Image &picture, int x, int y) {
+  for (int i = 0; i < tileSize; ++i) {
+    for (int j = 0; j < tileSize; ++j) {
+      screen.PutPixel(x + i, y + j, picture.GetPixel(i, tileSize - j - 1));
     }
   }
+}
+
+
+void DrawRoom(Image &screen, Room &room) {
+  int height = room.room_data.size();
+  int base_x = 0;
+  int base_y = 0;
+  int pict_height = 0;
+  int pict_width = 0;
+  std::string pict_path;
+  for (int i = 0; i < height; ++i) {
+    int width = room.room_data[i].size();
+    for (int j = 0; j < width; ++j) {
+      switch (room.room_data[i][j])
+      {
+      case TileType::WALL:
+        DrawTile(screen, *room.wall, base_x, base_y);
+        break;
+      case TileType::FLOOR:
+        DrawTile(screen, *room.floor, base_x, base_y);
+        break;
+      case TileType::EMPTY:
+        DrawTile(screen, *room.empty, base_x, base_y);
+        break;
+      case TileType::EXIT:
+        // pict_path = room.exit_path;
+        break;
+      case TileType::CLOSED_DOOR:
+        // pict_path = room.closed_door_path;
+        break;
+      case TileType::OPENED_DOOR:
+        // pict_path = room.opened_door_path;
+        break;
+      }
+      base_x += tileSize;
+    }
+    base_x = 0;
+    base_y += tileSize;
+  }
+
 }
 
 int main(int argc, char** argv)
@@ -145,7 +174,7 @@ int main(int argc, char** argv)
 	// glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-  GLFWwindow*  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "My RPG", nullptr, nullptr); // application window
+  GLFWwindow*  window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "My game", nullptr, nullptr); // application window
 	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -170,8 +199,6 @@ int main(int argc, char** argv)
 	while (gl_error != GL_NO_ERROR)
 		gl_error = glGetError();
 
-	Point starting_pos{.x = WINDOW_WIDTH / 2, .y = WINDOW_HEIGHT / 2};
-	Player player{starting_pos};
 
 	
   
@@ -180,19 +207,26 @@ int main(int argc, char** argv)
   glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);  GL_CHECK_ERRORS; // set size of the visiable part of the window
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GL_CHECK_ERRORS;
 
+  std::string room_path ="resources/roomA";
+  Room cur_room(room_path, 'A');
+
+  Point starting_pos{.x = cur_room.player_start_pos.x, .y = cur_room.player_start_pos.y};
+	Player player{starting_pos};
+
 
 
   //game loop
 	while (!glfwWindowShouldClose(window))
 	{
-    drawBackground(&screenBuffer);
+    DrawRoom(screenBuffer, cur_room);
+    // drawBackground(&screenBuffer);
 
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
     glfwPollEvents(); // proccess all pending
 
-    processPlayerMovement(player);
+    processPlayerMovement(player, cur_room);
     player.Draw(screenBuffer);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); GL_CHECK_ERRORS;

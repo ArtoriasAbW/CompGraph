@@ -2,12 +2,7 @@
 #define MAIN_PLAYER_H
 
 #include "Image.h"
-
-struct Point
-{
-  int x;
-  int y;
-};
+#include "Room.h"
 
 enum class MovementDir
 {
@@ -23,7 +18,7 @@ struct Player
                  coords(pos), old_coords(coords) {};
 
   bool Moved() const;
-  void ProcessInput(MovementDir dir);
+  void ProcessInput(MovementDir dir, Room &room);
   void Draw(Image &screen);
 
 private:

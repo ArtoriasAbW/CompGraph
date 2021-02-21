@@ -14,9 +14,15 @@ CMakeFiles/main.dir/Player.cpp.o
  /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Image.h
  /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Player.cpp
  /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Player.h
+ /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Room.h
+CMakeFiles/main.dir/Room.cpp.o
+ /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Image.h
+ /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Room.cpp
+ /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Room.h
 CMakeFiles/main.dir/main.cpp.o
  /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Image.h
  /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Player.h
+ /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/Room.h
  /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/common.h
  /home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/main.cpp
  dependencies/include/GLAD/KHR/khrplatform.h

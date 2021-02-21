@@ -13,9 +13,15 @@ CMakeFiles/main.dir/Image.cpp.o: stb_image_write.h
 CMakeFiles/main.dir/Player.cpp.o: Image.h
 CMakeFiles/main.dir/Player.cpp.o: Player.cpp
 CMakeFiles/main.dir/Player.cpp.o: Player.h
+CMakeFiles/main.dir/Player.cpp.o: Room.h
+
+CMakeFiles/main.dir/Room.cpp.o: Image.h
+CMakeFiles/main.dir/Room.cpp.o: Room.cpp
+CMakeFiles/main.dir/Room.cpp.o: Room.h
 
 CMakeFiles/main.dir/main.cpp.o: Image.h
 CMakeFiles/main.dir/main.cpp.o: Player.h
+CMakeFiles/main.dir/main.cpp.o: Room.h
 CMakeFiles/main.dir/main.cpp.o: common.h
 CMakeFiles/main.dir/main.cpp.o: main.cpp
 CMakeFiles/main.dir/main.cpp.o: dependencies/include/GLAD/KHR/khrplatform.h

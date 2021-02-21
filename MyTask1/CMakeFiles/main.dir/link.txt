@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/main.dir/glad.c.o CMakeFiles/main.dir/Image.cpp.o CMakeFiles/main.dir/Player.cpp.o CMakeFiles/main.dir/main.cpp.o -o bin/main  /usr/lib/libGL.so /usr/local/lib/libglfw3.a -lrt -ldl /usr/lib/librt.so -lm -ldl /usr/lib/libX11.so -lpthread 
+/usr/bin/c++ CMakeFiles/main.dir/glad.c.o CMakeFiles/main.dir/Image.cpp.o CMakeFiles/main.dir/Player.cpp.o CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/Room.cpp.o -o bin/main  /usr/lib/libGL.so /usr/local/lib/libglfw3.a -lrt -ldl /usr/lib/librt.so -lm -ldl /usr/lib/libX11.so -lpthread 
