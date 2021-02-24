@@ -4,6 +4,8 @@
 #include "Image.h"
 #include "Room.h"
 
+constexpr int MAX_HP = 20;
+
 enum class MovementDir
 {
   UP,
@@ -15,11 +17,21 @@ enum class MovementDir
 struct Player
 {
   explicit Player(Point pos = {.x = 10, .y = 10}) :
-                 coords(pos), old_coords(coords) {};
+                 coords(pos), old_coords(coords), state(PlayerState::ALIVE), health_points(MAX_HP) 
+                 {};
 
   bool Moved() const;
   void ProcessInput(MovementDir dir, Room &room);
   void Draw(Image &screen);
+  PlayerState State() {return state;}
+  void setState(PlayerState state_) {state = state_;}
+  void setCoords(Point coords_) {
+    coords.x = coords_.x;
+    coords.y = coords_.y;
+  }
+  Point getCoords() {
+    return coords;
+  }
 
 private:
   Point coords {.x = 10, .y = 10};
@@ -27,6 +39,9 @@ private:
   Pixel color {.r = 80, .g = 255, .b = 0, .a = 255};
   Image icon{"resources/player.png"};
   int move_speed = 4; 
+  PlayerState state;
+  Direction direction;
+  int health_points;
 };
 
 #endif //MAIN_PLAYER_H

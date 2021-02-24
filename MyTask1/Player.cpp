@@ -23,48 +23,65 @@ void Player::ProcessInput(MovementDir dir, Room &room) { // TODO: need to fix
       new_y += move_dist;
       neighbour_cell1.y += tileSize + move_dist - 1;
       neighbour_cell2.y += move_dist + tileSize - 1;
-      neighbour_cell2.x += tileSize - 1;
+      neighbour_cell2.x += tileSize - 4;
       break;
     case MovementDir::DOWN:
       old_coords.y = coords.y;
-      // coords.y -= move_dist;
       new_y -= move_dist;
       neighbour_cell1.y -= move_dist;
       neighbour_cell2.y -= move_dist;
-      neighbour_cell2.x += tileSize - 1;
+      neighbour_cell2.x += tileSize - 4;
       break;
     case MovementDir::LEFT:
+      direction = Direction::LEFT;
       old_coords.x = coords.x;
-      // coords.x -= move_dist;
       new_x -= move_dist;
       neighbour_cell1.x -= move_dist;
       neighbour_cell2.x -= move_dist;
-      neighbour_cell1.y += tileSize - 1;
+      neighbour_cell1.y += tileSize - 4;
       break;
     case MovementDir::RIGHT:
+      direction = Direction::RIGHT;
       old_coords.x = coords.x;
-      // coords.x += move_dist;
       new_x += move_dist;
       neighbour_cell1.x += move_dist + tileSize - 1;
       neighbour_cell2.x += move_dist + tileSize - 1;
-      neighbour_cell2.y += tileSize - 1;
+      neighbour_cell2.y += tileSize - 4;
       break;
     default:
       break;
   }
-  if (!(isWall(room, neighbour_cell1) || isWall(room, neighbour_cell2))) {
-    coords.x = new_x;
-    coords.y = new_y;
+  // TODO: обобщить для всех клеток
+  int old_x = coords.x;
+  int old_y = coords.y;
+  coords.x = new_x;
+  coords.y = new_y;
+  if (isType(room, neighbour_cell1, TileType::WALL) || isType(room, neighbour_cell2, TileType::WALL)) {
+    coords.x = old_x;
+    coords.y = old_y;
+  }
+  if (isType(room, neighbour_cell1, TileType::CLOSED_DOOR) || isType(room, neighbour_cell2, TileType::CLOSED_DOOR)) {
+    coords.x = old_x;
+    coords.y = old_y;
+  }
+  if (isType(room, neighbour_cell1, TileType::EMPTY) || isType(room, neighbour_cell2, TileType::EMPTY)) {
+    state = PlayerState::DEAD;
+  }
+  if (isType(room, neighbour_cell1, TileType::EXIT) || isType(room, neighbour_cell2, TileType::EXIT)) {
+    state = PlayerState::WIN;
+  }
+   if (isType(room, neighbour_cell1, TileType::OPENED_DOOR) || isType(room, neighbour_cell2, TileType::OPENED_DOOR)) {
+    state = PlayerState::AT_DOOR;
   }
 }
 
-void Player::Draw(Image &screen)
-{
+void Player::Draw(Image &screen) {
   for(int y = coords.y; y <= coords.y + tileSize; ++y)
   {
     for(int x = coords.x; x <= coords.x + tileSize; ++x)
     {
-      screen.PutPixel(x, y, blend(screen.GetPixel(x, y), icon.GetPixel(x - coords.x, tileSize - y + coords.y)));
+      screen.PutPixel(x, y, blend(screen.GetPixel(x, y), 
+      icon.GetPixel(direction == Direction::RIGHT ? tileSize - x + coords.x: x - coords.x, tileSize - y + coords.y)));
     }
   }
 }
