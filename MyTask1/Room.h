@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <array>
 #include <fstream>
 #include <memory>
 #include "Image.h"
@@ -19,7 +20,8 @@ enum class TileType {
   EXIT,
   EMPTY,
   CLOSED_DOOR,
-  OPENED_DOOR
+  OPENED_DOOR,
+  KEY
 };
 
 enum class PlayerState {
@@ -38,18 +40,19 @@ using Picture = std::unique_ptr<Image, std::default_delete<Image>>;
 
 
 struct Room {
-  Room(std::string path, char room_type);
-  // ~Room();
-  void _Print();
+  Room(std::string path, int room_type);
   std::vector<std::vector<TileType>> room_data;
+  std::array<int, 4> room_idxs; // для перехода в другие комнаты
   Point player_start_pos;
   char type;
+  
   Picture wall;
   Picture floor;
   Picture empty;
   Picture exit;
   Picture opened_door;
   Picture closed_door;
+  Picture key;
 };
 
 

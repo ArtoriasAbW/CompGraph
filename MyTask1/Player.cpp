@@ -10,8 +10,8 @@ bool Player::Moved() const
 }
 
 
-void Player::ProcessInput(MovementDir dir, Room &room) { // TODO: need to fix
-  int move_dist = 4;
+void Player::ProcessInput(MovementDir dir, Room &room) { 
+  int move_dist = move_speed;
   Point neighbour_cell1 = {.x = coords.x, .y = coords.y};
   Point neighbour_cell2 = {.x = coords.x, .y = coords.y};
   int new_x = coords.x;
@@ -23,14 +23,14 @@ void Player::ProcessInput(MovementDir dir, Room &room) { // TODO: need to fix
       new_y += move_dist;
       neighbour_cell1.y += tileSize + move_dist - 1;
       neighbour_cell2.y += move_dist + tileSize - 1;
-      neighbour_cell2.x += tileSize - 4;
+      neighbour_cell2.x += tileSize - 5;
       break;
     case MovementDir::DOWN:
       old_coords.y = coords.y;
       new_y -= move_dist;
       neighbour_cell1.y -= move_dist;
       neighbour_cell2.y -= move_dist;
-      neighbour_cell2.x += tileSize - 4;
+      neighbour_cell2.x += tileSize - 5;
       break;
     case MovementDir::LEFT:
       direction = Direction::LEFT;
@@ -38,7 +38,7 @@ void Player::ProcessInput(MovementDir dir, Room &room) { // TODO: need to fix
       new_x -= move_dist;
       neighbour_cell1.x -= move_dist;
       neighbour_cell2.x -= move_dist;
-      neighbour_cell1.y += tileSize - 4;
+      neighbour_cell1.y += tileSize - 5;
       break;
     case MovementDir::RIGHT:
       direction = Direction::RIGHT;
@@ -46,7 +46,7 @@ void Player::ProcessInput(MovementDir dir, Room &room) { // TODO: need to fix
       new_x += move_dist;
       neighbour_cell1.x += move_dist + tileSize - 1;
       neighbour_cell2.x += move_dist + tileSize - 1;
-      neighbour_cell2.y += tileSize - 4;
+      neighbour_cell2.y += tileSize - 5;
       break;
     default:
       break;
@@ -56,22 +56,35 @@ void Player::ProcessInput(MovementDir dir, Room &room) { // TODO: need to fix
   int old_y = coords.y;
   coords.x = new_x;
   coords.y = new_y;
-  if (isType(room, neighbour_cell1, TileType::WALL) || isType(room, neighbour_cell2, TileType::WALL)) {
-    coords.x = old_x;
-    coords.y = old_y;
-  }
-  if (isType(room, neighbour_cell1, TileType::CLOSED_DOOR) || isType(room, neighbour_cell2, TileType::CLOSED_DOOR)) {
-    coords.x = old_x;
-    coords.y = old_y;
-  }
-  if (isType(room, neighbour_cell1, TileType::EMPTY) || isType(room, neighbour_cell2, TileType::EMPTY)) {
-    state = PlayerState::DEAD;
-  }
-  if (isType(room, neighbour_cell1, TileType::EXIT) || isType(room, neighbour_cell2, TileType::EXIT)) {
-    state = PlayerState::WIN;
-  }
-   if (isType(room, neighbour_cell1, TileType::OPENED_DOOR) || isType(room, neighbour_cell2, TileType::OPENED_DOOR)) {
+  if (isType(room, neighbour_cell1, TileType::OPENED_DOOR) || isType(room, neighbour_cell2, TileType::OPENED_DOOR)) {
     state = PlayerState::AT_DOOR;
+  } else if (isType(room, neighbour_cell1, TileType::WALL) || isType(room, neighbour_cell2, TileType::WALL)) {
+    coords.x = old_x;
+    coords.y = old_y;
+  } else if (isType(room, neighbour_cell1, TileType::CLOSED_DOOR)) {
+    coords.x = old_x;
+    coords.y = old_y;
+    if (key_number > 0) {
+      key_number -= 1;
+      room.room_data[neighbour_cell1.y / tileSize][neighbour_cell1.x / tileSize] = TileType::OPENED_DOOR;
+    }
+  } else if (isType(room, neighbour_cell2, TileType::CLOSED_DOOR)) {
+    coords.x = old_x;
+    coords.y = old_y;
+    if (key_number > 0) {
+      key_number -= 1;
+      room.room_data[neighbour_cell2.y / tileSize][neighbour_cell2.x / tileSize] = TileType::OPENED_DOOR;
+    }
+  } else if (isType(room, neighbour_cell1, TileType::EMPTY) || isType(room, neighbour_cell2, TileType::EMPTY)) {
+    state = PlayerState::DEAD;
+  } else if (isType(room, neighbour_cell1, TileType::EXIT) || isType(room, neighbour_cell2, TileType::EXIT)) {
+    state = PlayerState::WIN;
+  } else if (isType(room, neighbour_cell1, TileType::KEY)) {
+    room.room_data[neighbour_cell1.y / tileSize][neighbour_cell1.x / tileSize] = TileType::FLOOR;
+    key_number += 1;
+  } else if (isType(room, neighbour_cell2, TileType::KEY)) {
+    room.room_data[neighbour_cell2.y / tileSize][neighbour_cell2.x / tileSize] = TileType::FLOOR;
+    key_number += 1;
   }
 }
 

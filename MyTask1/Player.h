@@ -17,7 +17,7 @@ enum class MovementDir
 struct Player
 {
   explicit Player(Point pos = {.x = 10, .y = 10}) :
-                 coords(pos), old_coords(coords), state(PlayerState::ALIVE), health_points(MAX_HP) 
+                 coords(pos), old_coords(coords), state(PlayerState::ALIVE), health_points(MAX_HP), key_number(0)
                  {};
 
   bool Moved() const;
@@ -38,10 +38,11 @@ private:
   Point old_coords {.x = 10, .y = 10};
   Pixel color {.r = 80, .g = 255, .b = 0, .a = 255};
   Image icon{"resources/player.png"};
-  int move_speed = 4; 
+  int move_speed = 3; 
   PlayerState state;
   Direction direction;
   int health_points;
+  int key_number;
 };
 
 #endif //MAIN_PLAYER_H

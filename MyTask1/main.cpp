@@ -115,28 +115,18 @@ int initGL()
 	return 0;
 }
 
-Point EnterTheDoor(Point old) {
-  std::cout << old.x << " " << old.y << std::endl;
-  if (old.x > WINDOW_WIDTH - 3 * tileSize) {
-    std::cout  << "1" << std::endl;
-    return {tileSize, old.y};
-  }
-  if (old.x <= tileSize) {
-    std::cout  << "2" << std::endl;
-    return {WINDOW_WIDTH - 3 * tileSize, old.y};
-  }
-  if (old.y > WINDOW_HEIGHT - tileSize) {
-    std::cout  << "3" << std::endl;
-    return {old.x, 2 * tileSize};
-  }
-  std::cout  << "4" << std::endl;
-  return {old.x, WINDOW_HEIGHT - 2 * tileSize};
-}
-
 void DrawTile(Image &screen, Image &picture, int x, int y) {
   for (int i = 0; i < tileSize; ++i) {
     for (int j = 0; j < tileSize; ++j) {
       screen.PutPixel(x + i, y + j, picture.GetPixel(i, tileSize - j - 1));
+    }
+  }
+}
+
+void DrawKey(Image &screen, Image &key, Image &floor, int x, int y) {
+   for (int i = 0; i < tileSize; ++i) {
+    for (int j = 0; j < tileSize; ++j) {
+      screen.PutPixel(x + i, y + j, blend(floor.GetPixel(i, tileSize - j - 1), key.GetPixel(i, tileSize - j - 1)));
     }
   }
 }
@@ -172,6 +162,9 @@ void DrawRoom(Image &screen, Room &room) {
       case TileType::OPENED_DOOR:
         DrawTile(screen, *room.opened_door.get(), base_x, base_y);
         break;
+      case TileType::KEY:
+        DrawKey(screen, *room.key.get(), *room.floor.get(), base_x, base_y);
+        break;
       }
       base_x += tileSize;
     }
@@ -180,8 +173,23 @@ void DrawRoom(Image &screen, Room &room) {
   }
 }
 
-Room *nextRoom(std::vector<Room> &rooms, int idx) {
-  return &rooms[idx % rooms.size()];
+Room *nextRoom(std::vector<Room> &rooms, Room * cur_room, Player &player) {
+  Point old = player.getCoords();
+  if (old.x > WINDOW_WIDTH - 3 * tileSize) { // right
+    player.setCoords({tileSize, old.y});
+    return &rooms[cur_room->room_idxs[2]];
+  }
+  if (old.x <= tileSize + 5) {  // left
+    player.setCoords({WINDOW_WIDTH - 3 * tileSize, old.y});
+    return &rooms[cur_room->room_idxs[0]];
+  }
+  if (old.y > WINDOW_HEIGHT - 3 * tileSize) { // up
+    player.setCoords({old.x, tileSize});
+    return &rooms[cur_room->room_idxs[1]];
+  }
+  std::cout << old.x << " " << old.y << std::endl;
+  player.setCoords({old.x, WINDOW_HEIGHT - 2 * tileSize}); // down
+  return &rooms[cur_room->room_idxs[3]];
 }
 
 void DrawEndOfGame(Image &buffer, Image &picture) {
@@ -192,6 +200,54 @@ void DrawEndOfGame(Image &buffer, Image &picture) {
       buffer.PutPixel(base_x + i, base_y + j, picture.GetPixel(i, picture.Height() - j - 1));
     }
   }
+}
+
+Pixel blackout(Pixel pixel) {
+  int speed = 10;
+  if (pixel.r >= speed) {
+    pixel.r -= speed;
+  } else {
+    pixel.r = 0;
+  }
+  if (pixel.g >= speed) {
+    pixel.g -= speed;
+  } else {
+    pixel.g = 0;
+  }
+  if (pixel.b >= speed) {
+    pixel.b -= speed;
+  } else {
+    pixel.b = 0;
+  }
+  return pixel;
+}
+
+bool isBlack(Pixel pixel) {
+  return !pixel.r && !pixel.g && !pixel.b;
+}
+
+
+void goToRoom(GLFWwindow *window, Image &screenBuffer) {
+  Pixel tmp;
+    bool black = true;
+    while (true) {
+      black = true;
+      for (int i = 0; i < WINDOW_WIDTH; ++i) {
+        for (int j = 0; j < WINDOW_HEIGHT; ++j) {
+          tmp = screenBuffer.GetPixel(i, j);
+          screenBuffer.PutPixel(i, j, blackout(tmp));
+          if (!isBlack(tmp)) {
+            black = false;
+          }
+        }
+      }
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); GL_CHECK_ERRORS;
+      glDrawPixels (WINDOW_WIDTH, WINDOW_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, screenBuffer.Data()); GL_CHECK_ERRORS;
+      glfwSwapBuffers(window); 
+      if (black) {
+        break;
+      }
+    }
 }
 
 int main(int argc, char** argv)
@@ -238,18 +294,24 @@ int main(int argc, char** argv)
   lab.open("resources/rooms");
   int room_number;
   lab >> room_number;
-  char room_type;
-  std::string room_path ="resources/room";
+  int room_type, door_number, door_type, next_room;
+  std::string room_path ="resources/";
   std::vector<Room> rooms;
   for (int i = 0; i < room_number; ++i) {
     lab >> room_type;
-    Room room1(room_path, room_type);
-    rooms.push_back(std::move(room1));
+    Room room(room_path, room_type);
+    lab >> door_number;
+    for (int j = 0; j < door_number; ++j) {
+      lab >> door_type >> next_room;
+      room.room_idxs[door_type - 1] = next_room - 1;
+    }
+    rooms.push_back(std::move(room));
   }
   lab.close();  
 
+
   int room_idx = 0;
-  Room *cur_room = nextRoom(rooms, room_idx);
+  Room *cur_room = &rooms[0];
   Point starting_pos{.x = cur_room->player_start_pos.x, .y = cur_room->player_start_pos.y};
 	Player player{starting_pos};
 
@@ -267,17 +329,14 @@ int main(int argc, char** argv)
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
     glfwPollEvents(); // proccess all pending
+    player.Draw(screenBuffer);
     if (player.State() == PlayerState::ALIVE) {
       processPlayerMovement(player, *cur_room);
-    }
-    player.Draw(screenBuffer);
-    if (player.State() == PlayerState::DEAD) {
+    } else if (player.State() == PlayerState::DEAD) {
       DrawEndOfGame(screenBuffer, lose);    
-    }
-    if (player.State() == PlayerState::WIN) {
+    } else if (player.State() == PlayerState::WIN) {
       DrawEndOfGame(screenBuffer, win);
-    }
-    if (player.State() == PlayerState::AT_DOOR) {
+    } else if (player.State() == PlayerState::AT_DOOR) {
       cur_time = glfwGetTime();
       GLfloat delta =  cur_time - old_time;
       old_time = cur_time;
@@ -286,8 +345,8 @@ int main(int argc, char** argv)
         if (room_idx == room_number) {
           room_idx = 0;
         }
-        cur_room = nextRoom(rooms, room_idx);
-        player.setCoords(EnterTheDoor(player.getCoords()));
+        goToRoom(window, screenBuffer);
+        cur_room = nextRoom(rooms, cur_room, player);
       }
       player.setState(PlayerState::ALIVE);
     }

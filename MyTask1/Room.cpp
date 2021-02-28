@@ -1,17 +1,17 @@
 #include "Room.h"
 #include <iostream>
 
-Room::Room(std::string path, char room_type) { 
+Room::Room(std::string path, int room_type) { 
     std::ifstream input;
-    path += room_type;
-    std::string pics_path = path + "/pics";
+    std::string pics_path = path + "pics";
     floor = std::make_unique<Image>(pics_path + "/floor.png");
     wall = std::make_unique<Image>(pics_path + "/wall.png");
     empty = std::make_unique<Image>(pics_path + "/empty.png");
     opened_door = std::make_unique<Image>(pics_path + "/opened_door.png");
     closed_door = std::make_unique<Image>(pics_path + "/closed_door.png");
     exit = std::make_unique<Image>(pics_path + "/exit.png");
-    input.open(path + "/room" + room_type);
+    key = std::make_unique<Image>(pics_path + "/key.png");
+    input.open(path + std::to_string(room_type));
     std::string line;
     int j = 0;
     while (!input.eof()) {
@@ -42,6 +42,9 @@ Room::Room(std::string path, char room_type) {
                 case 'X':
                   tmp.push_back(TileType::OPENED_DOOR);
                   break;
+                case 'K':
+                  tmp.push_back(TileType::KEY);
+                  break;
                 }
         }
         room_data.push_back(std::move(tmp));
@@ -52,23 +55,6 @@ Room::Room(std::string path, char room_type) {
       std::swap(room_data[k], room_data[room_data.size() - k - 1]);
     }
     player_start_pos.y = (j - 1) * tileSize - player_start_pos.y;
-}
-
-void Room::_Print() {
-  for (int i = 0; i < room_data.size(); ++i) {
-    for (int j = 0; j < room_data[i].size(); ++j) {
-      switch (room_data[i][j]) 
-      {
-      case TileType::FLOOR:
-        std::cout << "floor";
-        break;
-      case TileType::WALL:
-        std::cout << "wall";
-        break;
-      } 
-    }
-    std::cout << std::endl;
-  }
 }
 
 
