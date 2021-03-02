@@ -45,6 +45,7 @@ struct Room {
   std::array<int, 4> room_idxs; // для перехода в другие комнаты
   Point player_start_pos;
   char type;
+  int number;
   
   Picture wall;
   Picture floor;

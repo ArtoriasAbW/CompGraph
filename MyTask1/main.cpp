@@ -177,7 +177,7 @@ Room *nextRoom(std::vector<Room> &rooms, Room * cur_room, Player &player) {
   Point old = player.getCoords();
   if (old.x > WINDOW_WIDTH - 3 * tileSize) { // right
     player.setCoords({tileSize, old.y});
-    return &rooms[cur_room->room_idxs[2]];
+      return &rooms[cur_room->room_idxs[2]];
   }
   if (old.x <= tileSize + 5) {  // left
     player.setCoords({WINDOW_WIDTH - 3 * tileSize, old.y});
@@ -187,7 +187,6 @@ Room *nextRoom(std::vector<Room> &rooms, Room * cur_room, Player &player) {
     player.setCoords({old.x, tileSize});
     return &rooms[cur_room->room_idxs[1]];
   }
-  std::cout << old.x << " " << old.y << std::endl;
   player.setCoords({old.x, WINDOW_HEIGHT - 2 * tileSize}); // down
   return &rooms[cur_room->room_idxs[3]];
 }
@@ -297,9 +296,12 @@ int main(int argc, char** argv)
   int room_type, door_number, door_type, next_room;
   std::string room_path ="resources/";
   std::vector<Room> rooms;
+  int room_num;
   for (int i = 0; i < room_number; ++i) {
+    lab >> room_num;
     lab >> room_type;
     Room room(room_path, room_type);
+    room.number = room_num;
     lab >> door_number;
     for (int j = 0; j < door_number; ++j) {
       lab >> door_type >> next_room;
@@ -341,12 +343,9 @@ int main(int argc, char** argv)
       GLfloat delta =  cur_time - old_time;
       old_time = cur_time;
       if (delta > 0.1) { // чтобы избежать двойного перехода сквозь дверь
-        ++room_idx;
-        if (room_idx == room_number) {
-          room_idx = 0;
-        }
         goToRoom(window, screenBuffer);
         cur_room = nextRoom(rooms, cur_room, player);
+        std::cout << cur_room->number << std::endl;
       }
       player.setState(PlayerState::ALIVE);
     }
