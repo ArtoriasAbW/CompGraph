@@ -180,7 +180,7 @@ Room *nextRoom(std::vector<Room> &rooms, Room * cur_room, Player &player) {
       return &rooms[cur_room->room_idxs[2]];
   }
   if (old.x <= tileSize + 5) {  // left
-    player.setCoords({WINDOW_WIDTH - 3 * tileSize, old.y});
+    player.setCoords({WINDOW_WIDTH - 2 * tileSize, old.y});
     return &rooms[cur_room->room_idxs[0]];
   }
   if (old.y > WINDOW_HEIGHT - 3 * tileSize) { // up
@@ -247,6 +247,26 @@ void goToRoom(GLFWwindow *window, Image &screenBuffer) {
         break;
       }
     }
+}
+
+
+void make_door_opened(Point pos, Room *room) {
+  std::vector<Point> neighbour_cells;
+  neighbour_cells.push_back({pos.x, pos.y});
+  neighbour_cells.push_back({pos.x + tileSize, pos.y});
+  neighbour_cells.push_back({pos.x, pos.y + tileSize});
+  neighbour_cells.push_back({pos.x, pos.y - tileSize});
+  neighbour_cells.push_back({pos.x - tileSize, pos.y});
+  neighbour_cells.push_back({pos.x + tileSize, pos.y - tileSize});
+  neighbour_cells.push_back({pos.x + tileSize, pos.y + tileSize});
+  neighbour_cells.push_back({pos.x - tileSize, pos.y - tileSize});
+  neighbour_cells.push_back({pos.x - tileSize, pos.y + tileSize});
+  neighbour_cells.push_back({pos.x + tileSize, pos.y - tileSize});
+  for (Point & cell : neighbour_cells) {
+    if (isType(*room, cell, TileType::CLOSED_DOOR)) {
+      room->room_data[cell.y / tileSize][cell.x / tileSize] = TileType::OPENED_DOOR;
+    }
+  }
 }
 
 int main(int argc, char** argv)
@@ -345,7 +365,7 @@ int main(int argc, char** argv)
       if (delta > 0.1) { // чтобы избежать двойного перехода сквозь дверь
         goToRoom(window, screenBuffer);
         cur_room = nextRoom(rooms, cur_room, player);
-        std::cout << cur_room->number << std::endl;
+        make_door_opened(player.getCoords(), cur_room);
       }
       player.setState(PlayerState::ALIVE);
     }

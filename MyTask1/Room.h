@@ -39,7 +39,8 @@ enum class Direction {
 using Picture = std::unique_ptr<Image, std::default_delete<Image>>;
 
 
-struct Room {
+class Room {
+public:
   Room(std::string path, int room_type);
   std::vector<std::vector<TileType>> room_data;
   std::array<int, 4> room_idxs; // для перехода в другие комнаты
@@ -54,6 +55,18 @@ struct Room {
   Picture opened_door;
   Picture closed_door;
   Picture key;
+};
+
+
+class Enemy {
+public:
+  Enemy();
+
+private:
+  Point cur_pos;
+  Picture pict;
+  Point begin_pos;
+  Point end_pos;
 };
 
 
