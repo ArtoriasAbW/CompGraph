@@ -316,7 +316,7 @@ int main(int argc, char** argv)
   int room_type, door_number, door_type, next_room;
   std::string room_path ="resources/";
   std::vector<Room> rooms;
-  int room_num;
+  int room_num, enemy_number;
   for (int i = 0; i < room_number; ++i) {
     lab >> room_num;
     lab >> room_type;
@@ -327,6 +327,13 @@ int main(int argc, char** argv)
       lab >> door_type >> next_room;
       room.room_idxs[door_type - 1] = next_room - 1;
     }
+    lab >> enemy_number;
+    for (int j = 0; j < enemy_number; ++j) {
+      int begin_x, end_x, begin_y, end_y;
+      lab >> begin_x >> begin_y >> end_x >> end_y;
+      Enemy tmp({begin_x, begin_y}, {end_x, end_y});
+      room.enemies.push_back(std::move(tmp));
+    }
     rooms.push_back(std::move(room));
   }
   lab.close();  
@@ -336,24 +343,38 @@ int main(int argc, char** argv)
   Room *cur_room = &rooms[0];
   Point starting_pos{.x = cur_room->player_start_pos.x, .y = cur_room->player_start_pos.y};
 	Player player{starting_pos};
-
   Image lose("resources/lose.png");
   Image win("resources/win.png");
 
   GLfloat old_time = glfwGetTime();
   GLfloat cur_time;
+  GLfloat prevFrame = 0;
   //game loop
 	while (!glfwWindowShouldClose(window))
 	{
     DrawRoom(screenBuffer, *cur_room);
 
 		GLfloat currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+    GLfloat delta = currentFrame - prevFrame;
     glfwPollEvents(); // proccess all pending
     player.Draw(screenBuffer);
+    for (auto &enemy : cur_room->enemies) {
+      enemy.draw(screenBuffer);
+    }
     if (player.State() == PlayerState::ALIVE) {
       processPlayerMovement(player, *cur_room);
+      if (delta > 0.03) {
+        for (auto &enemy : cur_room->enemies) {
+          enemy.move();
+        }
+        prevFrame = glfwGetTime();
+      }
+      for (auto &enemy : cur_room->enemies) {
+        if (player.getCoords().x / tileSize == enemy.getCoords().x / tileSize 
+          && player.getCoords().y / tileSize == enemy.getCoords().y / tileSize) {
+          player.setState(PlayerState::DEAD);
+        }
+      }
     } else if (player.State() == PlayerState::DEAD) {
       DrawEndOfGame(screenBuffer, lose);    
     } else if (player.State() == PlayerState::WIN) {

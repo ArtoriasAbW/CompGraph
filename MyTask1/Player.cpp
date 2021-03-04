@@ -23,14 +23,14 @@ void Player::ProcessInput(MovementDir dir, Room &room) {
       new_y += move_dist;
       neighbour_cell1.y += tileSize + move_dist - 1;
       neighbour_cell2.y += move_dist + tileSize - 1;
-      neighbour_cell2.x += tileSize - 5;
+      neighbour_cell2.x += tileSize - 6;
       break;
     case MovementDir::DOWN:
       old_coords.y = coords.y;
       new_y -= move_dist;
       neighbour_cell1.y -= move_dist;
       neighbour_cell2.y -= move_dist;
-      neighbour_cell2.x += tileSize - 5;
+      neighbour_cell2.x += tileSize - 6;
       break;
     case MovementDir::LEFT:
       direction = Direction::LEFT;

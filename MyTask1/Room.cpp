@@ -45,6 +45,9 @@ Room::Room(std::string path, int room_type) {
                 case 'K':
                   tmp.push_back(TileType::KEY);
                   break;
+                case 'e':
+                  tmp.push_back(TileType::ENEMY);
+                  break;
                 }
         }
         room_data.push_back(std::move(tmp));
@@ -63,4 +66,54 @@ bool isType(Room &room, Point point, TileType type) {
     return true;
   }
   return false;
+}
+
+
+
+// straight motion only
+void Enemy::move() {
+  if (begin_pos.x != end_pos.x) {
+    if (direction) {
+      if (cur_pos.x < end_pos.x - move_speed) {
+        cur_pos.x += move_speed;
+      } else {
+        cur_pos.x = end_pos.x;
+        direction = false;
+      }
+    } else {
+      if (cur_pos.x > begin_pos.x + move_speed) {
+        cur_pos.x -= move_speed;
+      } else {
+        cur_pos.x = begin_pos.x;
+        direction = true;
+      }
+    }
+  } else {
+    if (direction) {
+      if (cur_pos.y < end_pos.y - move_speed) {
+        cur_pos.y += move_speed;
+      } else {
+        cur_pos.y = end_pos.y;
+        direction = false;
+      }
+    } else {
+      if (cur_pos.y > begin_pos.y + move_speed) {
+        cur_pos.y -= move_speed;
+      } else {
+        cur_pos.y = begin_pos.y;
+        direction = true;
+      }
+    }
+  }
+}
+
+void Enemy::draw(Image &screen) {
+  for(int y = cur_pos.y; y <= cur_pos.y + tileSize; ++y)
+  {
+    for(int x = cur_pos.x; x <= cur_pos.x + tileSize; ++x)
+    {
+      screen.PutPixel(x, y, blend(screen.GetPixel(x, y), 
+      icon.get()->GetPixel(direction ? tileSize - x + cur_pos.x : x - cur_pos.x, tileSize - y + cur_pos.y)));
+    }
+  }
 }
