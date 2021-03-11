@@ -1,3 +1,0 @@
-/home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/CMakeFiles/rebuild_cache.dir
-/home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/CMakeFiles/edit_cache.dir
-/home/pavel/6_sem/CompGraph/msu_cmc_cg_2021/MyTask1/CMakeFiles/main.dir

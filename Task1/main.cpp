@@ -202,7 +202,7 @@ void DrawEndOfGame(Image &buffer, Image &picture) {
 }
 
 Pixel blackout(Pixel pixel) {
-  int speed = 10;
+  int speed = 8;
   if (pixel.r >= speed) {
     pixel.r -= speed;
   } else {
@@ -220,6 +220,7 @@ Pixel blackout(Pixel pixel) {
   }
   return pixel;
 }
+
 
 bool isBlack(Pixel pixel) {
   return !pixel.r && !pixel.g && !pixel.b;
@@ -316,12 +317,11 @@ int main(int argc, char** argv)
   int room_type, door_number, door_type, next_room;
   std::string room_path ="resources/";
   std::vector<Room> rooms;
-  int room_num, enemy_number;
+  int enemy_number;
   for (int i = 0; i < room_number; ++i) {
-    lab >> room_num;
     lab >> room_type;
     Room room(room_path, room_type);
-    room.number = room_num;
+    room.number = room_type;
     lab >> door_number;
     for (int j = 0; j < door_number; ++j) {
       lab >> door_type >> next_room;
@@ -383,7 +383,7 @@ int main(int argc, char** argv)
       cur_time = glfwGetTime();
       GLfloat delta =  cur_time - old_time;
       old_time = cur_time;
-      if (delta > 0.1) { // чтобы избежать двойного перехода сквозь дверь
+      if (delta > 0.1) {
         goToRoom(window, screenBuffer);
         cur_room = nextRoom(rooms, cur_room, player);
         make_door_opened(player.getCoords(), cur_room);
